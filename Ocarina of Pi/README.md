@@ -41,6 +41,8 @@ This guide walks you through everything from preparing your Raspberry Pi to play
 | **USB power supply** | 5V, 2A (official Pi 2B supply recommended) |
 | **USB hub** (if using controller) | Powered hub if your controller requires more power than the Pi's USB port provides |
 
+> **SDL2 Setup**: The pre-packaged `SDL2-RPI.tar.gz` referenced in the build script may be unavailable. See **[SDL2 Setup Guide](docs/SDL2_SETUP.md)** for alternative installation methods including system packages, GitHub clone, and source build — all with VideoCore IV hardware acceleration.
+
 ### Software (on your main computer, for building)
 
 - **Linux computer** (Ubuntu, Debian, or similar) — used for cross-compiling or building natively
@@ -203,20 +205,26 @@ sudo apt install -y libsdl2-dev libgles2-mesa-dev libegl1-mesa-dev \
 
 > **Note**: `libdrm-dev` provides the DRM/KMS headers (`drm.h`) required for the video pipeline.
 
-#### Step 4A.3 — Obtain SDL2-RPI
+#### Step 4A.3 — Obtain SDL2-RPI (VideoCore IV SDL2)
 
-The Pi's VideoCore IV GPU requires a special SDL2 build that uses the OpenGL ES 2.0 drivers.
+The Pi's VideoCore IV GPU requires a special SDL2 build with hardware-accelerated GLES2 support. **The pre-packaged `SDL2-RPI.tar.gz` may be unavailable.** Use one of these alternatives:
 
-1. Download SDL2-RPI from: [https://github.com/psifidotos/SDL2-RPI](https://github.com/psifidotos/SDL2-RPI)
-2. Extract the archive and place it in the project parent directory:
-   ```bash
-   cd /home/khalesis/Documentos/Ocarina\ of\ Pi/
-   # Extract SDL2-RPI so it becomes:
-   # /home/khalesis/Documentos/Ocarina of Pi/../SDL2-RPI
-   tar xzf SDL2-RPI.tar.gz -C ..
-   ```
+> **If SDL2-RPI tarball is available** (fallback):
+> 1. Download from: [https://github.com/psifidotos/SDL2-RPI](https://github.com/psifidotos/SDL2-RPI)
+> 2. Extract into the project parent directory:
+>    ```bash
+>    cd /home/khalesis/Documentos/Ocarina\ of\ Pi/
+>    tar xzf SDL2-RPI.tar.gz -C ..
+>    ```
 
-> **Note**: If SDL2-RPI is not available, the build script will warn you. In that case, use **Method B** instead.
+> **If SDL2-RPI tarball is unavailable** (recommended):
+> Install SDL2 directly on the Raspberry Pi using system packages or build from source. See the **[SDL2 Setup Guide](docs/SDL2_SETUP.md)** for complete instructions covering:
+> - System package installation (`libsdl2-dev`) — easiest
+> - Cloning SDL2-RPI from GitHub
+> - Building SDL2 from official source with VideoCore IV support
+> - KMSDRM configuration and driver verification
+
+> **Note**: If SDL2-RPI is not installed, the build script will warn you. On Raspberry Pi OS, `libsdl2-dev` provides adequate GLES2 support for the 240p composite target.
 
 #### Step 4A.4 — Clone or Copy the Project
 

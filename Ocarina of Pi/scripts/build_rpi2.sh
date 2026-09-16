@@ -36,15 +36,15 @@ cd "${BUILD_DIR}"
 
 echo "[3/6] Checking for SDL2-RPI..."
 if [ ! -d "${PROJECT_DIR}/../SDL2-RPI" ]; then
-    echo "  Downloading SDL2-RPI..."
-    cd "${PROJECT_DIR}"
-    if [ ! -f "SDL2-RPI.tar.gz" ]; then
-        echo "  NOTE: Download SDL2-RPI from https://github.com/psifidotos/SDL2-RPI"
-        echo "  Place SDL2-RPI.tar.gz in the project root and re-run"
-        exit 1
-    fi
-    tar xzf SDL2-RPI.tar.gz
-    cd "${BUILD_DIR}"
+    echo "  WARNING: SDL2-RPI directory not found"
+    echo "  The pre-packaged SDL2-RPI.tar.gz may be unavailable."
+    echo "  Install SDL2 via system packages on the Pi:"
+    echo "    sudo apt install -y libsdl2-dev libgles2-mesa-dev libegl1-mesa-dev"
+    echo "  Or build from source (see docs/SDL2_SETUP.md)"
+    echo "  Continuing with system SDL2..."
+    SDL2_PATH="/usr"
+else
+    SDL2_PATH="${PROJECT_DIR}/../SDL2-RPI"
 fi
 
 echo "[4/6] Configuring CMake..."
@@ -54,7 +54,7 @@ cmake "${PROJECT_DIR}" \
     -DCMAKE_SYSTEM_PROCESSOR=armv7l \
     -DCMAKE_C_COMPILER="${CROSS_COMPILE}gcc" \
     -DCMAKE_CXX_COMPILER="${CROSS_COMPILE}g++" \
-    -DSDL2_PATH="${PROJECT_DIR}/../SDL2-RPI" \
+    -DSDL2_PATH="${SDL2_PATH}" \
     -DCMAKE_C_FLAGS="-march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -O3 -ftree-vectorize -fomit-frame-pointer -flto" \
     -DCMAKE_CXX_FLAGS="-march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -O3 -ftree-vectorize -fomit-frame-pointer -flto -fno-exceptions -fno-rtti" \
     -DCMAKE_EXE_LINKER_FLAGS="-Wl,-O3 -Wl,--as-needed"

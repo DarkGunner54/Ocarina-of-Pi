@@ -1,0 +1,60 @@
+# Raspberry Pi 2B - Ocarina of Pi 240p Composite Output Profile
+# Place this file at the root of the SD card boot partition
+
+# === Hardware Overclocking ===
+arm_freq=900
+gpu_freq=250
+core_freq=250
+sdram_freq=450
+over_voltage=6
+
+# === 240p Analog Video Output ===
+# Force composite video output via TRRS jack
+hdmi_force_hotplug=1
+hdmi_ignore_edid=0xa5000080
+hdmi_group=2
+hdmi_mode=20
+hdmi_drive=2
+
+# NTSC artifact 240p mode (use 16 for PAL 240p)
+sdtv_mode=20
+sdtv_aspect=2
+
+# Enable TV output on GPIO 4 (COMposite)
+enable_tvout=1
+
+# === Memory Split ===
+# 256MB GPU (required for VideoCore IV + texture streaming)
+gpu_mem=256
+
+# === Power Management ===
+max_usb_current=1
+power_off_on_halt=0
+
+# === Performance ===
+# Disable activity LED blinking
+dtparam=act_led_trigger=none
+dtparam=act_led_activelow=off
+
+# === Audio ===
+# Force 3.5mm TRRS audio output (not HDMI)
+audio_pwm_mode=2
+audio_pwm_boost=5
+hdmi_ignore_cec_init=1
+
+# === Kernel / Boot ===
+disable_splash=1
+avoid_warnings=1
+boot_delay=1
+
+# === Overclock warnings ===
+arm_freq_min=200
+kernel=kernel7.img
+
+# === Optional: Reduce GPU memory fragmentation ===
+dispmanx_offline=1
+
+# === Disable unnecessary hardware ===
+dtparam=i2c_arm=off
+dtparam=spi=off
+dtparam=audio=off

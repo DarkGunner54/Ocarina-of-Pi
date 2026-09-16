@@ -1,0 +1,52 @@
+# Ocarina of Pi - ROM Configuration
+# This file is read by post_build.sh to locate the game ROM
+# and configure controller compatibility settings.
+
+# === ROM Path Configuration ===
+# Set the directory where ROM files are stored.
+# Can be an absolute path or relative to the project root.
+# The script will search for valid N64 ROMs in this directory.
+ROM_DIRECTORY="/home/khalesis/Documentos/Ocarina of Pi/roms"
+
+# Specific ROM file path (if set, overrides directory search).
+# Leave empty to enable automatic ROM discovery in ROM_DIRECTORY.
+ROM_FILE=""
+
+# Accepted ROM file extensions (space-separated, case-insensitive).
+ROM_EXTENSIONS="z64 n64 rom zip 7z"
+
+# === XInput Compatibility Settings ===
+# Enable XInput controller support via SDL2.
+# On Linux, XInput controllers (Xbox 360/One/Series controllers)
+# are detected through the xpad kernel driver or xboxdrv daemon.
+ENABLE_XINPUT=1
+
+# Path to xboxdrv daemon binary (if using software XInput bridge).
+XBOXDRV_PATH="/usr/bin/xboxdrv"
+
+# SDL2 environment variable to force XInput driver on Windows.
+# On Linux, this is auto-detected; set only if manual override needed.
+SDL_JOYSTICK_DRIVER=""
+
+# === N64 ROM Validation ===
+# Expected CRC32 values for Ocarina of Time (optional - for verification).
+# Leave empty to skip CRC validation.
+CRC32_GOLD=""
+CRC32_SCRAMBLE=""
+
+# Minimum ROM size in bytes (N64 z64 typically 8MB / 8388608 bytes).
+MIN_ROM_SIZE=8388608
+
+# Maximum ROM size in bytes.
+MAX_ROM_SIZE=16777216
+
+# === Deployment Settings ===
+# Destination directory on the Raspberry Pi SD card.
+DEPLOY_ROM_DIR="/roms"
+
+# Whether to include the ROM in the deployment package.
+INCLUDE_ROM_IN_DEPLOY=1
+
+# === Audio/Video Override ===
+# Force PAL region ROM timing (0=auto, 1=NTSC, 2=PAL).
+REGION_OVERRIDE=0

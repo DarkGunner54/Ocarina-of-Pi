@@ -11,75 +11,50 @@ echo "============================================"
 echo "  Ocarina of Pi - RPi2B Build Script"
 echo "============================================"
 
-echo "[1/6] Checking dependencies..."
+echo "[1/5] Checking toolchain availability..."
+if ! command -v "${CROSS_COMPILE}gcc" &>/dev/null; then
+    echo "  ERROR: ${CROSS_COMPILE}gcc not found"
+    echo "  Install with: sudo apt install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf"
+    exit 1
+fi
+echo "  Toolchain found: $(${CROSS_COMPILE}gcc --version | head -1)"
 
-REQUIRED_PKGS=(
-    cmake
-    g++-arm-linux-gnueabihf
-    libsdl2-dev:armhf
-    libgles2-mesa-dev:armhf
-    libegl1-mesa-dev:armhf
-    libasound2-dev:armhf
-    libpthread-stubs0-dev:armhf
-    libbcm-host-dev:armhf
-)
-
-for pkg in "${REQUIRED_PKGS[@]}"; do
-    if ! dpkg -s "$pkg" &>/dev/null; then
-        echo "  WARNING: $pkg not found - may need cross-compile toolchain"
-    fi
-done
-
-echo "[2/6] Creating build directory..."
+echo "[2/5] Creating build directory..."
 mkdir -p "${BUILD_DIR}"
 cd "${BUILD_DIR}"
 
-echo "[3/6] Checking for SDL2-RPI..."
-if [ ! -d "${PROJECT_DIR}/../SDL2-RPI" ]; then
-    echo "  WARNING: SDL2-RPI directory not found"
-    echo "  The pre-packaged SDL2-RPI.tar.gz may be unavailable."
-    echo "  Install SDL2 via system packages on the Pi:"
-    echo "    sudo apt install -y libsdl2-dev libgles2-mesa-dev libegl1-mesa-dev"
-    echo "  Or build from source (see docs/SDL2_SETUP.md)"
-    echo "  Continuing with system SDL2..."
-    SDL2_PATH="/usr"
+echo "[3/5] Checking for SDL2..."
+SDL2_PATH_ARG=""
+if [ -d "${PROJECT_DIR}/../SDL2-RPI" ]; then
+    echo "  SDL2-RPI found at ${PROJECT_DIR}/../SDL2-RPI"
+    SDL2_PATH_ARG="-DSDL2_PATH=${PROJECT_DIR}/../SDL2-RPI"
 else
-    SDL2_PATH="${PROJECT_DIR}/../SDL2-RPI"
+    echo "  SDL2-RPI not found - will use system packages"
+    echo "  Install: sudo apt install -y libsdl2-dev libgles2-mesa-dev libegl1-mesa-dev"
+    SDL2_PATH_ARG="-DSDL2_PATH=/usr"
 fi
 
-echo "[4/6] Configuring CMake..."
+echo "[4/5] Configuring CMake with toolchain..."
 cmake "${PROJECT_DIR}" \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_SYSTEM_NAME=Linux \
-    -DCMAKE_SYSTEM_PROCESSOR=armv7l \
-    -DCMAKE_C_COMPILER="${CROSS_COMPILE}gcc" \
-    -DCMAKE_CXX_COMPILER="${CROSS_COMPILE}g++" \
-    -DSDL2_PATH="${SDL2_PATH}" \
-    -DCMAKE_C_FLAGS="-march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -O3 -ftree-vectorize -fomit-frame-pointer -flto" \
-    -DCMAKE_CXX_FLAGS="-march=armv7-a -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -O3 -ftree-vectorize -fomit-frame-pointer -flto -fno-exceptions -fno-rtti" \
-    -DCMAKE_EXE_LINKER_FLAGS="-Wl,-O3 -Wl,--as-needed"
+    -DCMAKE_TOOLCHAIN_FILE="${PROJECT_DIR}/toolchain-armpi.cmake" \
+    ${SDL2_PATH_ARG} \
+    -DCMAKE_BUILD_TYPE=Release
 
-echo "[5/6] Compiling ${TARGET_NAME}..."
-cmake --build . --config Release -- -j4
-
-echo "[6/6] Deployment preparation..."
-
-mkdir -p "${BUILD_DIR}/deploy"
-cp "${BUILD_DIR}/${TARGET_NAME}" "${BUILD_DIR}/deploy/"
-cp "${PROJECT_DIR}/config/config.txt" "${BUILD_DIR}/deploy/"
+echo "[5/5] Compiling ${TARGET_NAME}..."
+cmake --build "${BUILD_DIR}" --config Release -- -j4
 
 echo ""
 echo "============================================"
 echo "  Build Complete!"
 echo "============================================"
-echo "  Binary:  ${BUILD_DIR}/deploy/${TARGET_NAME}"
-echo "  Config:  ${BUILD_DIR}/deploy/config.txt"
+echo "  Binary:  ${BUILD_DIR}/${TARGET_NAME}"
 echo ""
 echo "  Deploy to SD card:"
-echo "    cp -r ${BUILD_DIR}/deploy/* /mnt/sdcard/"
+echo "    cp ${BUILD_DIR}/${TARGET_NAME} /mnt/sdcard/"
+echo "    cp ${PROJECT_DIR}/config/config.txt /mnt/sdcard/"
 echo ""
 echo "  Run natively on RPi2B:"
-echo "    ./${TARGET_NAME}"
+echo "    cd / && ./ocarina_of_pi"
 echo ""
 
 echo "[POST-BUILD] Running post-build automation..."
@@ -87,13 +62,4 @@ if [ -x "${PROJECT_DIR}/scripts/post_build.sh" ]; then
     "${PROJECT_DIR}/scripts/post_build.sh"
 else
     echo "  WARNING: post_build.sh not found or not executable"
-fi
-
-echo "[Optional] Cross-compile verification..."
-if command -v qemu-arm &>/dev/null; then
-    echo "  qemu-arm found - can verify binary architecture:"
-    file "${BUILD_DIR}/${TARGET_NAME}"
-    qemu-arm -L /usr/arm-linux-gnueabihf "${BUILD_DIR}/${TARGET_NAME}" --version 2>/dev/null && echo "  Binary architecture OK" || echo "  Note: qemu-arm functional check skipped (no display available)"
-else
-    echo "  qemu-arm not found - skipping binary verification"
 fi

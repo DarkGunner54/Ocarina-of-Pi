@@ -276,10 +276,12 @@ bash scripts/build_rpi2.sh
 The script will:
 1. Check that all dependencies are present
 2. Create a build directory
-3. Configure CMake with ARM toolchain settings (cross-compile) or native settings (on Pi)
+3. Configure CMake with the toolchain file (`toolchain-armpi.cmake`) for cross-compilation
 4. Compile the project using all 4 cores
 5. Copy the binary and config files to `build/deploy/`
 6. **Automatically run** the post-build script (see Section 6)
+
+> **CMake Toolchain**: The `toolchain-armpi.cmake` file in the project root tells CMake how to target ARMv7-A hardware. It sets the cross-compiler, system identity, and library search paths. This file is loaded automatically by `build_rpi2.sh` via `-DCMAKE_TOOLCHAIN_FILE`.
 
 ### Step 5.3 — Verify the Build
 
@@ -741,18 +743,25 @@ nano config/rom_config.txt
 # Set ROM_DIRECTORY="/home/khalesis/Documentos/Ocarina of Pi/roms"
 # Controller mapping is automatic — no config needed.
 
-# 5. Build:
-bash scripts/build_rpi2.sh
+# 5. Build (cross-compile from PC):
+# Ensure arm-linux-gnueabihf toolchain is installed
+cmake -DCMAKE_TOOLCHAIN_FILE=toolchain-armpi.cmake ..
+cmake --build build -- -j4
 
-# 6. Deploy to SD card:
+# 6. Build (native on Pi):
+# Simply run build_rpi2.sh or:
+cmake ..
+cmake --build build -- -j4
+
+# 7. Deploy to SD card:
 cp build/deploy/ocarina_of_pi /mnt/sdcard/
 cp build/deploy/config.txt /mnt/sdcard/
 cp build/deploy/launch.sh /mnt/sdcard/
 
-# 7. If ROM included by post-build:
+# 8. If ROM included by post-build:
 cp -r build/deploy/rom/* /mnt/sdcard/
 
-# 7. Boot Pi and launch:
+# 9. Boot Pi and launch:
 cd ~
 ./launch.sh
 ```

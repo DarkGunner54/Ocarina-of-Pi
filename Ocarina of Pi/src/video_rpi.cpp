@@ -207,7 +207,7 @@ bool VideoRpi::initOpenGLES() {
         return false;
     }
 
-    egl_surface_ = eglCreateWindowSurface(egl_display_, egl_config_, window_, nullptr);
+    egl_surface_ = eglCreateWindowSurface(egl_display_, egl_config_, reinterpret_cast<EGLNativeWindowType>(window_), nullptr);
     if (egl_surface_ == EGL_NO_SURFACE) {
         std::cerr << "eglCreateWindowSurface failed: " << eglGetError() << std::endl;
         return false;

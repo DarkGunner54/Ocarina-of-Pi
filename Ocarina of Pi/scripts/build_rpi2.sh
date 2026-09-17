@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="${PROJECT_DIR}/build"
 TARGET_NAME="ocarina_of_pi"
-CROSS_COMPILE="arm-linux-gnueabihf-"
+CROSS_COMPILE=""
 
 echo "============================================"
 echo "  Ocarina of Pi - RPi2B Build Script"
@@ -34,9 +34,8 @@ else
     SDL2_PATH_ARG="-DSDL2_PATH=/usr"
 fi
 
-echo "[4/5] Configuring CMake with toolchain..."
+echo "[4/5] Configuring native CMake build..."
 cmake "${PROJECT_DIR}" \
-    -DCMAKE_TOOLCHAIN_FILE="${PROJECT_DIR}/toolchain-armpi.cmake" \
     ${SDL2_PATH_ARG} \
     -DCMAKE_BUILD_TYPE=Release
 
@@ -58,8 +57,8 @@ echo "    cd / && ./ocarina_of_pi"
 echo ""
 
 echo "[POST-BUILD] Running post-build automation..."
-if [ -x "${PROJECT_DIR}/scripts/post_build.sh" ]; then
+if [ "${RUN_POST_BUILD:-0}" = "1" ] && [ -x "${PROJECT_DIR}/scripts/post_build.sh" ]; then
     "${PROJECT_DIR}/scripts/post_build.sh"
 else
-    echo "  WARNING: post_build.sh not found or not executable"
+    echo "  Post-build deployment skipped (set RUN_POST_BUILD=1 after integrating a real port)."
 fi

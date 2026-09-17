@@ -3,6 +3,8 @@
 #include <cstdio>
 #include <iostream>
 
+GameInput& GameInput::instance() { static GameInput input; return input; }
+
 GameInput::GameInput()
     : controller_(nullptr)
     , state_()

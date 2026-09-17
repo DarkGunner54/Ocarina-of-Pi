@@ -1,0 +1,21 @@
+[Unit]
+Description=Ocarina of Pi native port
+After=multi-user.target sound.target
+Wants=sound.target
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+User=@USER@
+WorkingDirectory=/opt/ocarina-of-pi
+Environment=SDL_VIDEODRIVER=kmsdrm
+Environment=SDL_AUDIODRIVER=alsa
+Environment=SDL_KMSDRM_DEVICE_INDEX=0
+ExecStart=/opt/ocarina-of-pi/launch.sh
+Restart=on-failure
+RestartSec=2
+StandardInput=tty
+TTYPath=/dev/tty1
+
+[Install]
+WantedBy=multi-user.target
